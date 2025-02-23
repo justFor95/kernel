@@ -36,33 +36,33 @@ on:
           - 5.4.y_5.10.y_5.15.y
           - 6.1.y_6.6.y_6.12.y
           - all
-      kernel_auto:
-        description: "Auto use the latest kernel"
-        required: false
-        default: true
-        type: boolean
+      # kernel_auto:
+      #   description: "Auto use the latest kernel"
+      #   required: false
+      #   default: true
+      #   type: boolean
       delete_source:
         description: "Delete the source after compilation"
         required: false
         default: true
         type: boolean
-      kernel_package:
-        description: "Select compile package list"
-        required: false
-        default: "all"
-        type: choice
-        options:
-          - all
-          - dtbs
-      kernel_toolchain:
-        description: "Select the compilation toolchain"
-        required: false
-        default: "gcc"
-        type: choice
-        options:
-          - clang
-          - gcc
-          - gcc-14.2
+      # kernel_package:
+      #   description: "Select compile package list"
+      #   required: false
+      #   default: "all"
+      #   type: choice
+      #   options:
+      #     - all
+      #     - dtbs
+      # kernel_toolchain:
+      #   description: "Select the compilation toolchain"
+      #   required: false
+      #   default: "gcc"
+      #   type: choice
+      #   options:
+      #     - clang
+      #     - gcc
+      #     - gcc-14.2
       compress_format:
         description: "Set the initrd compression format"
         required: false
@@ -89,6 +89,7 @@ on:
         default: "-ophub"
         type: choice
         options:
+          - -justFor95
           - -ophub
           - -happy-new-year
           - -dragon-boat-festival
@@ -99,7 +100,6 @@ on:
           - -summer-growing
           - -autumn-harvesting
           - -winter-storing
-          - -yourname
       kernel_config:
         description: "Set the path of kernel .config"
         required: false
@@ -108,6 +108,23 @@ on:
         options:
           - kernel-config/release/general
           - false
+      kernel_patch:
+        description: "Set the directory for kernel patches"
+        required: false
+        default: "kernel-patch/general"
+        type: choice
+        options:
+          - kernel-patch/general
+          - false
+      auto_patch:
+        description: "Set whether to use kernel patches"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - true
+          - false
+
 
 env:
   TZ: America/New_York
@@ -200,12 +217,14 @@ jobs:
           build_target: kernel
           kernel_source: ${{ inputs.kernel_source }}
           kernel_version: ${{ inputs.kernel_version }}
-          kernel_auto: ${{ inputs.kernel_auto }}
+          kernel_auto: true
           delete_source: ${{ inputs.delete_source }}
-          kernel_package: ${{ inputs.kernel_package }}
-          kernel_toolchain: ${{ inputs.kernel_toolchain }}
+          kernel_package: "all"
+          kernel_toolchain: "gcc"
           kernel_sign: ${{ inputs.kernel_sign }}
           kernel_config: ${{ inputs.kernel_config }}
+          kernel_patch: ${{ inputs.kernel_patch }}
+          auto_patch: ${{ inputs.auto_patch }}
           compress_format: ${{ inputs.compress_format }}
 
       - name: Upload Kernel to Release
@@ -219,6 +238,6 @@ jobs:
           body: |
             - The kernel can be used to compile Armbian and OpenWrt.
             - The kernel source code comes from: ${{ inputs.kernel_source }}
-            - The kernel compilation toolchain: ${{ inputs.kernel_toolchain }}
+            - The kernel compilation toolchain: gcc
             - This is a `stable` kernel, which can be used in Armbian and OpenWrt.
             - 这是`稳定版`内核，可以在 Armbian 和 OpenWrt 里使用。
